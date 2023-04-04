@@ -15,11 +15,11 @@ def get_embedding(text: str, model: str=EMBEDDING_MODEL) -> list[float]:
     )
     return result["data"][0]["embedding"]
 
-def indexing_document(self, dir, output):
+def indexing_document(dir, output):
 
     tunks = []
 
-    for root, dirs, files in os.walk('.'):
+    for root, dirs, files in os.walk(dir):
         for file in files:
             if file.endswith('.codon'):
                 with open(os.path.join(root, file), 'r') as f:
@@ -45,6 +45,7 @@ def indexing_document(self, dir, output):
 
     with open(output, 'wb') as f:
         pickle.dump(embeddings, f)
+    print(f'progress: 100%')
 
 def indexing_main():
     parser = argparse.ArgumentParser(description="Chat-bot indexer")
@@ -53,7 +54,6 @@ def indexing_main():
         "--dir",
         type=str,
         default=".",
-        required=True,
         help="The directory containing the documents to be indexed"
     )
     
@@ -61,15 +61,13 @@ def indexing_main():
         "--output",
         type=str,
         default="indexed_docs.pickle",
-        required=True,
         help="The file path to save the indexed output"
     )
 
     parser.add_argument(
         "--api-key",
         type=str,
-        default=os.environ['openai_api_key'],
-        required=True,
+        default='',
         help="The file path to save the indexed output"
     )
 
@@ -79,7 +77,8 @@ def indexing_main():
     if not api_key:
         if 'openai_api_key' in os.environ:
             api_key = os.environ['openai_api_key']
-        raise ValueError('Please provide the openai api key or set the environment variable "openai_api_key"')
+        else:
+            raise ValueError('Please provide the openai api key with the `--api-key` option or set the environment variable "openai_api_key"')
 
     openai.api_key = api_key
     document_dir = args.dir
@@ -87,4 +86,4 @@ def indexing_main():
     indexing_document(document_dir, indexed_file)
 
 if __name__ == "__main__":
-    main()
+    indexing_main()

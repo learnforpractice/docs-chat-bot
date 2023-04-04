@@ -30,17 +30,15 @@ embeddings = None
 
 def query(question):
     global embeddings
-    print('+++++++question:', question)
     query_embedding = get_embedding(question)
-    # print(query_embedding)
     document_similarities = sorted([
         (vector_similarity(query_embedding, doc_embedding), key) for key, doc_embedding in embeddings.items()
     ], reverse=True)
 
     context = []
     for similarity, document in document_similarities[:3]:
-        context.append(document)
-        print(similarity, document[:20])
+        if similarity > 0.5:
+            context.append(document)
     context = '\n'.join(context)
     # base on the following context and question, provide a conversational answer based on the context provided.:
     guide = """
@@ -57,14 +55,11 @@ I want you to act as an AI assistant, adept at analyzing provided text and answe
     context_messages = []
     context_messages.append({"role": "system", "content":  guide})
     context_messages.append({"role": "user", "content": prompt})
-    print(context_messages)
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=context_messages
     )
-    print('-'*100)
     ret = response['choices'][0]['message']['content']
-    print(ret)
     return ret
 
 app = FastAPI()
@@ -83,7 +78,6 @@ class MessageInput(BaseModel):
 
 @app.post("/chat")
 async def receive_message(data: MessageInput):
-    print(data)
     message = data.message
     ret = query(message)
     response = {
@@ -100,7 +94,6 @@ def main():
         "--host",
         type=str,
         default='127.0.0.1',
-        required=True,
         help="The host IP address for the chat-bot server, default to 127.0.0.1"
     )
     
@@ -108,7 +101,6 @@ def main():
         "--port",
         type=int,
         default=7999,
-        required=True,
         help="The port number for the chat-bot server, default to 7999"
     )
 
@@ -116,7 +108,6 @@ def main():
         "--api-key",
         type=str,
         default='',
-        required=True,
         help="The openai api key or use the environment variable 'openai_api_key'"
     )
     
@@ -124,7 +115,6 @@ def main():
         "--indexed-docs",
         type=str,
         default='indexed_docs.pickle',
-        required=True,
         help="The file path to save the indexed output"
     )
 
@@ -135,7 +125,8 @@ def main():
     if not api_key:
         if 'openai_api_key' in os.environ:
             api_key = os.environ['openai_api_key']
-        raise ValueError('Please provide the openai api key')
+        else:
+            raise ValueError('Please provide the openai api key')
     openai.api_key = api_key
 
     with open(args.indexed_docs, 'rb') as f:
