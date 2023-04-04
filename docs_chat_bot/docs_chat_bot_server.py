@@ -2,6 +2,7 @@ import os
 import time
 import pickle
 import argparse
+import logging
 import numpy as np
 import openai
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,6 +10,8 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 EMBEDDING_MODEL = "text-embedding-ada-002"
+
+logger = logging.getLogger(__name__)
 
 def get_embedding(text: str, model: str=EMBEDDING_MODEL) -> list[float]:
     result = openai.Embedding.create(
@@ -30,6 +33,7 @@ embeddings = None
 
 def query(question):
     global embeddings
+    logger.info("+++++++question: %s", question)
     query_embedding = get_embedding(question)
     document_similarities = sorted([
         (vector_similarity(query_embedding, doc_embedding), key) for key, doc_embedding in embeddings.items()

@@ -2,11 +2,14 @@ import os
 import time
 import pickle
 import argparse
+import logging
 import numpy as np
 import openai
 import pandas as pd
 
 EMBEDDING_MODEL = "text-embedding-ada-002"
+
+logger = logging.getLogger(__name__)
 
 def get_embedding(text: str, model: str=EMBEDDING_MODEL) -> list[float]:
     result = openai.Embedding.create(
@@ -45,7 +48,7 @@ def indexing_document(dir, output):
 
     with open(output, 'wb') as f:
         pickle.dump(embeddings, f)
-    print(f'progress: 100%')
+    print('progress: 100.00%')
 
 def indexing_main():
     parser = argparse.ArgumentParser(description="Chat-bot indexer")
