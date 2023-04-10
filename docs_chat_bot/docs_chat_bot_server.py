@@ -124,13 +124,16 @@ async def receive_message(data: MessageInput):
             "received_message": 'sorry, the message is too long'
         }
         return response
-
-    ret = query(message)
-    response = {
-        "status": "success",
-        "received_message": ret
-    }
-    return response
+    try:
+        ret = query(message)
+        response = {
+            "status": "success",
+            "received_message": ret
+        }
+        return response
+    except Exception as e:
+        logger.exception(e)
+    return 'oops!'
 
 def main():
     global embeddings

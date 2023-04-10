@@ -66,9 +66,13 @@ How to Segment Documents
 
 Once your documents are indexed, you will need to set up and run a document chatbot server. The server is responsible for processing user input, searching the indexed documents, and returning appropriate responses based on the information found within the documents.
 
-`docs_chat_bot_server --indexed-docs [indexed document] --api-key [openai API key]`
+```bash
+docs_chat_bot_server --indexed-docs [indexed document] --api-key [openai API key] --ssl-keyfile [ssl key file] --ssl-certfile [ssl cert file]
+```
 
 This command launches the chatbot server with the following options:
 
 1. `--indexed-docs`: Specifies the file containing indexed documents to be used by the chatbot server for retrieving information.
 2. `--api-key`: Sets the API key used to authenticate with external openai chatgpt services.
+3. `--ssl-keyfile`: Specifies ssl key file.
+4. `--ssl-certfile`: Specifies ssl cert file.
