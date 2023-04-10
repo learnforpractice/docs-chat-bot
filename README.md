@@ -17,7 +17,7 @@ plugins:
         docs_chat_endpoint: "http://localhost:7999/chat"
 ```
 
-Before using the chatbot, there are three essential tasks to complete:
+Before using the chatbot, there are additional essential tasks to complete:
 
 1. Indexing the documents
 2. Running a document chatbot server

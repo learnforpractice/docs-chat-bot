@@ -164,6 +164,20 @@ def main():
         help="The file path to save the indexed output"
     )
 
+    parser.add_argument(
+        "--ssl-keyfile",
+        type=str,
+        default='',
+        help="ssl key file"
+    )
+
+    parser.add_argument(
+        "--ssl-certfile",
+        type=str,
+        default='',
+        help="ssl cert file"
+    )
+
     args = parser.parse_args()
     host = args.host
     port = args.port
@@ -178,6 +192,7 @@ def main():
     with open(args.indexed_docs, 'rb') as f:
         embeddings = pickle.load(f)
 
-    uvicorn.run(app, host=host, port=port)
+    uvicorn.run(app, host=host, port=port, ssl_keyfile=args.ssl_keyfile, ssl_certfile=args.ssl_certfile)
+
 if __name__ == "__main__":
     main()
