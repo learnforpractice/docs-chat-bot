@@ -5,13 +5,20 @@ import argparse
 import logging
 import numpy as np
 import openai
+import tiktoken
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 from pydantic import BaseModel
 
 EMBEDDING_MODEL = "text-embedding-ada-002"
+max_prompt_token = 3000
 
 logger = logging.getLogger(__name__)
+gpt_encoding = tiktoken.encoding_for_model("gpt-3.5-turbo")
+
+def count_tokens(message) -> int:
+    tokens = gpt_encoding.encode(message)
+    return len(tokens)
 
 def get_embedding(text: str, model: str=EMBEDDING_MODEL) -> list[float]:
     result = openai.Embedding.create(
@@ -39,23 +46,50 @@ def query(question):
         (vector_similarity(query_embedding, doc_embedding), key) for key, doc_embedding in embeddings.items()
     ], reverse=True)
 
-    context = []
-    for similarity, document in document_similarities[:3]:
-        if similarity > 0.5:
-            context.append(document)
-    context = '\n'.join(context)
-    # base on the following context and question, provide a conversational answer based on the context provided.:
     guide = """
 I want you to act as an AI assistant, adept at analyzing provided text and answering questions based on the given context. When presented with extracted parts of a long document and a question, offer a conversational answer that is accurate and helpful. If the answer cannot be found within the provided context, simply respond with "Hmm, I'm not sure," without adding any speculative or extraneous information. Focus on delivering precise and reliable assistance based on the available information.
+here are some rules to follow:
+1. action name should be less than 12 characters, and only contain the following characters ".12345abcdefghijklmnopqrstuvwxyz"
+for example:
+```
+@action("hello")
+def hello():
+    print('hello')
+```
+"hello" is less then 12 characters, and only contains characters in ".12345abcdefghijklmnopqrstuvwxyz"
+2. reply with the same language of the latest question.
     """
-    prompt = f'''
-    {guide}
-    ###
-    {context}
-    ###
-    Question: {question}
-    Answer:'''
-        
+    token_count = count_tokens(guide)
+
+    tunks = []
+    prompt = ''
+    for similarity, document in document_similarities[:3]:
+        logger.info("similarity: %s, document: %s", similarity, document[:20])
+        if similarity > 0.5:
+            tunks.append(document)
+        content = '\n'.join(tunks)
+        tmp_prompt = f'''
+{guide}
+###
+{content}
+###
+Question: {question}
+Answer:'''
+        tokens_in_prompt = count_tokens(prompt)
+        if token_count + tokens_in_prompt > max_prompt_token:
+            break
+        token_count += tokens_in_prompt
+        prompt = tmp_prompt
+
+    if not prompt:
+        return "Sorry, prompt too long"
+
+    if token_count > max_prompt_token:
+        guide = guide[:max_prompt_token]
+
+
+    logger.info("+++++++++prompt: %s", prompt)
+    token_count = count_tokens(prompt)
     context_messages = []
     context_messages.append({"role": "system", "content":  guide})
     context_messages.append({"role": "user", "content": prompt})
@@ -64,6 +98,7 @@ I want you to act as an AI assistant, adept at analyzing provided text and answe
         messages=context_messages
     )
     ret = response['choices'][0]['message']['content']
+    # logger.info("+++++++++ret: %s", ret)
     return ret
 
 app = FastAPI()
@@ -83,6 +118,13 @@ class MessageInput(BaseModel):
 @app.post("/chat")
 async def receive_message(data: MessageInput):
     message = data.message
+    if len(message) > 1024:
+        response = {
+            "status": "error",
+            "received_message": 'sorry, the message is too long'
+        }
+        return response
+
     ret = query(message)
     response = {
         "status": "success",

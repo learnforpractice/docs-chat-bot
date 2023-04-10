@@ -42,7 +42,8 @@ class ChatPlugin(BasePlugin):
         )
 
     def on_post_page(self, html, page, config):
-        print(page)
+        plugin_config = self.config.copy()
+
         if page.url == '/':
             relative_path = './'
         else:
@@ -56,6 +57,7 @@ class ChatPlugin(BasePlugin):
         plugin = f"""
 <script>
 console.log("hello, plugin")
+var mkdocs_chat_plugin = {plugin_config};
 </script>
 <script src="{relative_path}js/chat-dialog-plugin.js"></script>
 

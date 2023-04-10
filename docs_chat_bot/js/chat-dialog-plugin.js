@@ -38,8 +38,8 @@
           chatBody.appendChild(message);
           chatInput.value = '';
         }
-
-        let ret = await fetch('http://localhost:7999/chat', {
+        
+        let ret = await fetch(mkdocs_chat_plugin['docs_chat_endpoint'], {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
