@@ -38,14 +38,28 @@ def vector_similarity(x: list[float], y: list[float]) -> float:
 
 embeddings = None
 
+def top_n_similarity(query_embedding, embeddings, n):
+    if n > len(embeddings):
+        raise Exception("n is larger than the length of the list")
+
+    top_n = [(float('-inf'), None)] * n
+
+    for key in embeddings:
+        doc_embedding = embeddings[key]
+        similarity = vector_similarity(query_embedding, doc_embedding)
+        min_value = min(top_n)
+        min_index = top_n.index(min_value)
+
+        if similarity > min_value[0]:
+            top_n[min_index] = (similarity, key)
+
+    return sorted(top_n, reverse=True)
+
 def query(question):
     global embeddings
     logger.info("+++++++question: %s", question)
     query_embedding = get_embedding(question)
-    document_similarities = sorted([
-        (vector_similarity(query_embedding, doc_embedding), key) for key, doc_embedding in embeddings.items()
-    ], reverse=True)
-
+    document_similarities = top_n_similarity(query_embedding, embeddings, 4)
     guide = """
 I want you to act as an AI assistant, adept at analyzing provided text and answering questions based on the given context. When presented with extracted parts of a long document and a question, offer a conversational answer that is accurate and helpful. If the answer cannot be found within the provided context, simply respond with "Hmm, I'm not sure," without adding any speculative or extraneous information. Focus on delivering precise and reliable assistance based on the available information.
 here are some rules to follow:
@@ -84,12 +98,6 @@ Answer:'''
     if not prompt:
         return "Sorry, prompt too long"
 
-    if token_count > max_prompt_token:
-        guide = guide[:max_prompt_token]
-
-
-    logger.info("+++++++++prompt: %s", prompt)
-    token_count = count_tokens(prompt)
     context_messages = []
     context_messages.append({"role": "system", "content":  guide})
     context_messages.append({"role": "user", "content": prompt})
