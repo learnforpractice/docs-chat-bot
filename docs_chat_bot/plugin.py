@@ -1,10 +1,10 @@
 import os
 import sys
-from timeit import default_timer as timer
 from datetime import datetime, timedelta
+from timeit import default_timer as timer
 
 from mkdocs import utils as mkdocs_utils
-from mkdocs.config import config_options, Config
+from mkdocs.config import Config, config_options
 from mkdocs.plugins import BasePlugin
 from mkdocs.utils import copy_file
 
