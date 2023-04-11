@@ -1,10 +1,8 @@
 import argparse
-import logging
 import os
 import pickle
 import time
 
-import numpy as np
 import openai
 import tiktoken
 from fastapi import FastAPI
@@ -14,7 +12,12 @@ from pydantic import BaseModel
 EMBEDDING_MODEL = "text-embedding-ada-002"
 max_prompt_token = 3000
 
-logger = logging.getLogger(__name__)
+from pymixin import log
+
+logger = log.get_logger(__name__)
+logger.addHandler(log.handler)
+
+
 gpt_encoding = tiktoken.encoding_for_model("gpt-3.5-turbo")
 
 from .utils import count_tokens, get_embedding, top_n_similarity

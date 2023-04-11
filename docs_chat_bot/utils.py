@@ -1,10 +1,10 @@
-import logging
-
 import numpy as np
 import openai
 import tiktoken
+from pymixin import log
 
-logger = logging.getLogger(__name__)
+logger = log.get_logger(__name__)
+logger.addHandler(log.handler)
 
 EMBEDDING_MODEL = "text-embedding-ada-002"
 max_prompt_token = 3000

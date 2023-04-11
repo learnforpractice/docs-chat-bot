@@ -3,10 +3,7 @@
 import argparse
 import asyncio
 import base64
-import logging
-import os
 import pickle
-import platform
 import signal
 import sys
 import time
@@ -18,10 +15,11 @@ from typing import Any, Dict, List, Optional, Set, Union
 import httpx
 import websockets
 import yaml
-from pymixin import utils
+from pymixin import log, utils
 from pymixin.mixin_ws_api import MessageView, MixinWSApi
 
-logger = logging.getLogger(__name__)
+logger = log.get_logger(__name__)
+logger.addHandler(log.handler)
 
 @dataclass
 class AnswerRequestTask:

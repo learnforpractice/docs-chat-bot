@@ -1,16 +1,17 @@
 import asyncio
-import logging
 import time
-import uuid
 from collections import deque
 from typing import Any, Dict, List, Optional, Tuple
 
 import openai
 import tiktoken
+from pymixin import log
 
 from .utils import count_tokens, get_embedding, top_n_similarity
 
-logger = logging.getLogger(__name__)
+logger = log.get_logger(__name__)
+logger.addHandler(log.handler)
+
 
 max_prompt_token = 3000
 rate_limit_size = 5

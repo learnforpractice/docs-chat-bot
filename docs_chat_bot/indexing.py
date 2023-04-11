@@ -1,16 +1,16 @@
 import argparse
-import logging
 import os
 import pickle
 import time
 
-import numpy as np
 import openai
-import pandas as pd
 
 EMBEDDING_MODEL = "text-embedding-ada-002"
 
-logger = logging.getLogger(__name__)
+from pymixin import log
+
+logger = log.get_logger(__name__)
+logger.addHandler(log.handler)
 
 def get_embedding(text: str, model: str=EMBEDDING_MODEL) -> list[float]:
     result = openai.Embedding.create(
