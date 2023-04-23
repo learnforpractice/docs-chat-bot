@@ -1,3 +1,4 @@
+from typing import Dict
 import numpy as np
 import openai
 import tiktoken
@@ -24,17 +25,17 @@ def get_embedding(text: str, model: str=EMBEDDING_MODEL) -> list[float]:
     return result["data"][0]["embedding"]
 
 
-def vector_similarity(x: list[float], y: list[float]) -> float:
+def vector_similarity(x: np.array, y: np.array) -> float:
     """
     Returns the similarity between two vectors.
     
     Because OpenAI Embeddings are normalized to length 1, the cosine similarity is the same as the dot product.
     """
-    return np.dot(np.array(x), np.array(y))
+    return np.dot(x, y)
 
 embeddings = None
 
-def top_n_similarity(query_embedding, embeddings, n):
+def top_n_similarity(query_embedding: np.array, embeddings: Dict[str, np.array], n):
     if n > len(embeddings):
         raise Exception("n is larger than the length of the list")
 

@@ -3,6 +3,7 @@ import time
 from collections import deque
 from typing import Any, Dict, List, Optional, Tuple
 
+import numpy as np
 import openai
 import tiktoken
 from pymixin import log
@@ -43,6 +44,7 @@ class ChatGPTBot:
     def generate_prompt(self, conversation_id: str, question: str) -> Optional[List[Dict[str, str]]]:
         logger.info("+++++++question: %s", question)
         query_embedding = get_embedding(question)
+        query_embedding = np.array(query_embedding)
         document_similarities = top_n_similarity(query_embedding, self.embedding_docs, 4)
         guide = """
 I want you to act as an AI assistant, adept at analyzing provided text and answering questions based on the given context. When presented with extracted parts of a long document and a question, offer a conversational answer that is accurate and helpful. If the answer cannot be found within the provided context, simply respond with "Hmm, I'm not sure," without adding any speculative or extraneous information. Focus on delivering precise and reliable assistance based on the available information.

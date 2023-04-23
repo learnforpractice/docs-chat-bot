@@ -3,6 +3,7 @@ import os
 import pickle
 import time
 
+import numpy as np
 import openai
 import tiktoken
 from fastapi import FastAPI
@@ -28,6 +29,7 @@ def query(question):
     global embeddings
     logger.info("+++++++question: %s", question)
     query_embedding = get_embedding(question)
+    query_embedding = np.array(query_embedding)
     document_similarities = top_n_similarity(query_embedding, embeddings, 4)
     guide = """
 I want you to act as an AI assistant, adept at analyzing provided text and answering questions based on the given context. When presented with extracted parts of a long document and a question, offer a conversational answer that is accurate and helpful. If the answer cannot be found within the provided context, simply respond with "Hmm, I'm not sure," without adding any speculative or extraneous information. Focus on delivering precise and reliable assistance based on the available information.
@@ -96,6 +98,7 @@ class MessageInput(BaseModel):
 @app.post("/chat")
 async def receive_message(data: MessageInput):
     message = data.message
+    logger.info("message: %s", message)
     if len(message) > 1024:
         response = {
             "status": "error",

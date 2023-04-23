@@ -3,6 +3,7 @@ import os
 import pickle
 import time
 
+import numpy as np
 import openai
 
 EMBEDDING_MODEL = "text-embedding-ada-002"
@@ -20,32 +21,30 @@ def get_embedding(text: str, model: str=EMBEDDING_MODEL) -> list[float]:
     return result["data"][0]["embedding"]
 
 def indexing_document(dir, output):
-
-    tunks = []
-
+    trunks = []
     for root, dirs, files in os.walk(dir):
         for file in files:
             if file.endswith('.codon'):
                 with open(os.path.join(root, file), 'r') as f:
                     code = f.read()
-                    tunks.append(code)
+                    trunks.append(code)
             elif file.endswith('.md'):
                 with open(os.path.join(root, file), 'r') as f:
                     code = f.read()
                     pieces = code.split(' '*100+'\n')
                     for piece in pieces:
-                        tunks.append(piece.strip())
+                        trunks.append(piece.strip())
 
     embeddings = {}
     progress = 0
     start = time.time()
-    for tunk in tunks:
+    for tunk in trunks:
         progress += 1
         if time.time() - start > 1:
             start = time.time()
-            print(f'progress: %.2f%%' % (progress / len(tunks) * 100), end='\r')
+            print(f'progress: %.2f%%' % (progress / len(trunks) * 100), end='\r')
         embedding = get_embedding(tunk)
-        embeddings[tunk] = embedding
+        embeddings[tunk] = np.array(embedding)
 
     with open(output, 'wb') as f:
         pickle.dump(embeddings, f)

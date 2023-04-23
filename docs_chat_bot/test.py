@@ -1,5 +1,8 @@
+import pickle
+import numpy as np
+import random
 import heapq
-
+from docs_chat_bot import indexing, utils
 
 def largest_n_numbers(lst, n):
     if n > len(lst):
@@ -28,26 +31,41 @@ def largest_n_numbers_2(lst, n):
 
     return top_n
 
-import random
+def test_top_find():
+    import random
 
-my_list = [1, 5, 8, 9, 2, 0, 11, 23, 56, 42, 77]
-my_list = [random.random() * 1000 for i in range(10000000)]
-n = 4
-import time
+    my_list = [1, 5, 8, 9, 2, 0, 11, 23, 56, 42, 77]
+    my_list = [random.random() * 1000 for i in range(10000000)]
+    n = 4
+    import time
 
-start = time.time()
-result = largest_n_numbers(my_list, n)
-print('+++duration:', time.time() - start)
-print(sorted(result, reverse=True))
+    start = time.time()
+    result = largest_n_numbers(my_list, n)
+    print('+++duration:', time.time() - start)
+    print(sorted(result, reverse=True))
 
-print('-'*10)
-start = time.time()
-sorted_list = sorted(my_list, reverse=True)
-print("+++duration:", time.time() - start)
-print(sorted_list[:n])
+    print('-'*10)
+    start = time.time()
+    sorted_list = sorted(my_list, reverse=True)
+    print("+++duration:", time.time() - start)
+    print(sorted_list[:n])
 
 
-start = time.time()
-ret = largest_n_numbers_2(my_list, n)
-print("+++duration:", time.time() - start)
-print(ret)
+    start = time.time()
+    ret = largest_n_numbers_2(my_list, n)
+    print("+++duration:", time.time() - start)
+    print(ret)
+
+def test_indexing():
+    print("test_indexing")
+    def get_embedding(text: str, model: str='') -> list[float]:
+        return [random.random() for x in range(10)]
+    indexing.get_embedding = get_embedding
+    indexing.indexing_document('.', 'test_indexing.pickle')
+
+    query_embedding = get_embedding('hello')
+    query_embedding = np.array(query_embedding)
+    with open('test_indexing.pickle', 'rb') as f:
+        embeddings = pickle.load(f)
+    document_similarities = utils.top_n_similarity(query_embedding, embeddings, 4)
+    print(document_similarities)

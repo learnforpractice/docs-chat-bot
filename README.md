@@ -33,13 +33,14 @@ The `indexing_docs` command is used to index a collection of documents using the
 usage:
 
 ```bash
-indexing_docs --dir [markdown document dir] --api-key [openai api key]
+indexing_docs --dir [markdown document dir] --api-key [openai api key] --output indexed_docs.pickle
 ```
 
 This command indexes the documents in the specified directory using the OpenAI Embedding Interface, with the following options:
 
 1. `--dir`: Specifies the directory containing the markdown documents to be indexed.
 2. `--api-key`: Sets the API key used to authenticate with the OpenAI API.
+3. `--output`: indexed docs file
 
 **Attention** 
 
