@@ -43,11 +43,9 @@ class ChatPlugin(BasePlugin):
 
     def on_post_page(self, html, page, config):
         plugin_config = self.config.copy()
+        print('+++++++++page.url:', page.url)
 
-        if page.url == '/':
-            relative_path = './'
-        else:
-            relative_path = '../'
+        relative_path = '../'* page.url.count('/')
         link = f'''
   <link rel="stylesheet" href="{relative_path}css/chat-dialog-plugin.css">
 '''
